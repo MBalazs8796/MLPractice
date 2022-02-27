@@ -41,6 +41,7 @@ def load_and_process(used_columns: list, replaceUni:bool=True, shouldScale:bool=
     if shouldScale:
         for index, max_value in df.max().iteritems():
             if max_value > 1 and index != 'enrollee_id':
-                df[index] = scaler.fit_transform(df[['training_hours']])
+                df[index] = scaler.fit_transform(df[[index]])
 
     return df
+    
