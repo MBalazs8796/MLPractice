@@ -1,5 +1,6 @@
 #%%
 import pandas as pd
+import numpy as np
 from sklearn.preprocessing import OrdinalEncoder, OneHotEncoder, MinMaxScaler
 #%%
 # used_column: a list of strings specifying which columns one wants to use
@@ -44,3 +45,9 @@ def load_and_process(used_columns: list, replaceUni:bool=True, shouldScale:bool=
                 df[index] = scaler.fit_transform(df[[index]])
 
     return df
+#%%
+def merge_test_input():
+    test_target = np.load("csv/test_input_target.npy")
+    test_rest = pd.read_csv("csv/test_input.csv")
+    return test_rest.join(pd.DataFrame(test_target, columns=["target"]))
+# %%
