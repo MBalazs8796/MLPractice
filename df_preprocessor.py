@@ -46,8 +46,13 @@ def load_and_process(used_columns: list, replaceUni:bool=True, shouldScale:bool=
 
     return df
 #%%
+# merges the two test data files into one data table
 def merge_test_input():
     test_target = np.load("csv/test_input_target.npy")
     test_rest = pd.read_csv("csv/test_input.csv")
     return test_rest.join(pd.DataFrame(test_target, columns=["target"]))
+# %%
+# splits the input training data into training and development parts
+def split_train_data(data:pd.DataFrame):
+    return (data.head(2000),data.tail(-2000))
 # %%
