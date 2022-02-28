@@ -7,7 +7,7 @@ from sklearn.preprocessing import OrdinalEncoder, OneHotEncoder, MinMaxScaler
 # shouldScale: decide whether to scale numeric values or not
 def load_and_process(used_columns: list, replaceUni:bool=True, shouldScale:bool=False) -> pd.DataFrame:
     # read data from csv
-    df = pd.read_csv("csv/aug_train.csv")
+    df = pd.read_csv("csv/train_input.csv")
 
     # list if columns that, if called for should be encoded
     TO_ONEHOT = {'gender', 'major_discipline', 'company_type', 'city'}
@@ -44,4 +44,3 @@ def load_and_process(used_columns: list, replaceUni:bool=True, shouldScale:bool=
                 df[index] = scaler.fit_transform(df[[index]])
 
     return df
-    
