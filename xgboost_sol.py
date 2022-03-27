@@ -17,12 +17,12 @@ y_test = test_df['target']
 test = xgb.DMatrix(test_df.drop('target', axis=1).values, label=y_test.values)
 # %%
 param = {
-    'max_depth': 4,
-    'eta' : 0.15,
+    'max_depth': 3,
+    'eta' : 0.1,
     'objective' : 'binary:hinge',
-    'min_child_weight' : 3
+    'min_child_weight' : 5
 }
-epochs = 10
+epochs = 20
 model = xgb.train(param, train, epochs)
 preds = model.predict(test)
 #f1_score(y_test, np.zeros(preds.shape[0]))
@@ -45,4 +45,3 @@ clf = GridSearchCV(XGBClassifier(objective='binary:hinge'), params, scoring='f1'
 clf.fit(df.drop('target', axis=1).values,y_train)
 print('Best-params:',clf.best_params_)
 print('Best-score:',clf.best_score_)
-print("F1 score: " + str(f1_score(y_test, clf.predict(test))))
