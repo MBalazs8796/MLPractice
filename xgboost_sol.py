@@ -8,12 +8,11 @@ from scipy.stats import binom_test
 from sklearn.model_selection import GridSearchCV
 #%%
 keepList = ['city', 'city_development_index', 'relevent_experience', 'enrolled_university', 'education_level', 'major_discipline', 'experience', 'company_size', 'company_type', 'last_new_job', 'training_hours', 'target']
-df = load_and_process("csv/train_input.csv", keepList)
+df, test_df = load_and_process("csv/train_input.csv", "csv/test_input.csv", keepList)
 #%%
 y_train = df['target']
 train = xgb.DMatrix(df.drop('target', axis=1).values, label=y_train.values)
 #%%
-test_df = load_and_process("csv/test_input.csv", keepList)
 y_test = test_df['target']
 test = xgb.DMatrix(test_df.drop('target', axis=1).values, label=y_test.values)
 # %%
@@ -46,3 +45,4 @@ clf = GridSearchCV(XGBClassifier(objective='binary:hinge'), params, scoring='f1'
 clf.fit(df.drop('target', axis=1).values,y_train)
 print('Best-params:',clf.best_params_)
 print('Best-score:',clf.best_score_)
+print("F1 score: " + str(f1_score(y_test, clf.predict(test))))
