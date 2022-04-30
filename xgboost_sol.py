@@ -7,12 +7,14 @@ from sklearn.metrics import f1_score, accuracy_score
 from scipy.stats import binom_test
 from sklearn.model_selection import GridSearchCV
 #%%
-PCA = True
+PCA = False
 
 keepList = ['city', 'city_development_index', 'relevent_experience', 'enrolled_university',  'major_discipline', 'experience', 'company_size', 'company_type',  'training_hours', 'target', 'gender']
 
-df, y_train,test_df, y_test = load_and_process("csv/train_input.csv", "csv/test_input.csv", keepList, PCAtarget=10)
-#df, test_df = load_and_process("csv/train_input.csv", "csv/test_input.csv", keepList)
+if PCA:
+    df, y_train,test_df, y_test = load_and_process("csv/train_input.csv", "csv/test_input.csv", keepList, PCAtarget=90)
+else:
+    df, test_df = load_and_process("csv/train_input.csv", "csv/test_input.csv", keepList)
 
 #%%
 if PCA:
@@ -29,8 +31,8 @@ param = {
     'eta' : 0.1,
     'objective' : 'binary:hinge',
     'min_child_weight' : 3,
-    'grow_policy' : 'depthwise',
-    'max_leaves' : 10,
+    'grow_policy' : 'lossguide',
+    'max_leaves' : 5,
     'tree_method' : 'gpu_hist',
     'max_bin' : 256
 }
@@ -68,6 +70,6 @@ print('Best-params:',clf.best_params_)
 print('Best-score:',clf.best_score_)
 
 """
-Test-acc:  0.9689320388349515
-F1 score: 0.9183673469387756
+Test-acc:  0.8553398058252427
+F1 score: 0.5895316804407713
 """

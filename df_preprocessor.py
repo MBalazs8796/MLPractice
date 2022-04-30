@@ -58,8 +58,8 @@ def load_and_process(train_path: str, test_path: str ,used_columns: list, replac
         elif PCAtarget > 0:
             y_train = df['target']
             y_test = tdf['target']
-            df = pca.fit_transform(df)
-            tdf = pca.fit_transform(tdf)
+            df = pca.fit_transform(df.drop('target', axis=1))
+            tdf = pca.fit_transform(tdf.drop('target', axis=1))
             return (df, y_train, tdf, y_test)
 
     return (df, tdf)
