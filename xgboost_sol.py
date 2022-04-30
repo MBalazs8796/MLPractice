@@ -7,22 +7,34 @@ from sklearn.metrics import f1_score, accuracy_score
 from scipy.stats import binom_test
 from sklearn.model_selection import GridSearchCV
 #%%
-keepList = ['city', 'city_development_index', 'relevent_experience', 'enrolled_university', 'education_level', 'major_discipline', 'experience', 'company_size', 'company_type', 'last_new_job', 'training_hours', 'target']
-df, test_df = load_and_process("csv/train_input.csv", "csv/test_input.csv", keepList)
+PCA = True
+
+keepList = ['city', 'city_development_index', 'relevent_experience', 'enrolled_university',  'major_discipline', 'experience', 'company_size', 'company_type',  'training_hours', 'target', 'gender']
+
+df, y_train,test_df, y_test = load_and_process("csv/train_input.csv", "csv/test_input.csv", keepList, PCAtarget=10)
+#df, test_df = load_and_process("csv/train_input.csv", "csv/test_input.csv", keepList)
+
 #%%
-y_train = df['target']
-train = xgb.DMatrix(df.drop('target', axis=1).values, label=y_train.values)
-#%%
-y_test = test_df['target']
-test = xgb.DMatrix(test_df.drop('target', axis=1).values, label=y_test.values)
+if PCA:
+    train = xgb.DMatrix(df, label=y_train.values)
+    test = xgb.DMatrix(test_df, label=y_test.values)
+else:
+    y_test = test_df['target']
+    test = xgb.DMatrix(test_df.drop('target', axis=1).values, label=y_test.values)
+    y_train = df['target']
+    train = xgb.DMatrix(df.drop('target', axis=1).values, label=y_train.values)
 # %%
 param = {
-    'max_depth': 3,
+    'max_depth': 4,
     'eta' : 0.1,
     'objective' : 'binary:hinge',
-    'min_child_weight' : 5
+    'min_child_weight' : 3,
+    'grow_policy' : 'depthwise',
+    'max_leaves' : 10,
+    'tree_method' : 'gpu_hist',
+    'max_bin' : 256
 }
-epochs = 20
+epochs = 100
 model = xgb.train(param, train, epochs)
 preds = model.predict(test)
 #f1_score(y_test, np.zeros(preds.shape[0]))
@@ -37,11 +49,25 @@ print("F1 score: " + str(f1_score(y_test, preds)))
 #%%
 
 params = [{
-    'max_depth': [4,5,6],
-    'eta' : [0.5, 0.1, 0.15, 0.2],
-    'min_child_weight' : [1,2,3]
+    'max_depth': [1,2,3,4,5,6],
+    'eta' : [0.1,0.01,0.2],
+    'min_child_weight' : [1,2,3],
+    'grow_policy' : ['depthwise', 'lossguide'],
+    'max_leaves' : [10],
+    'max_bin' : [256],
+    'num_parallel_tree' : [1],
+    'tree_method' : ['gpu_hist']
 }]
-clf = GridSearchCV(XGBClassifier(objective='binary:hinge'), params, scoring='f1',cv=10, refit = True, return_train_score=True)
-clf.fit(df.drop('target', axis=1).values,y_train)
+if PCA:
+    clf = GridSearchCV(XGBClassifier(objective='binary:hinge'), params, scoring='f1',cv=10, refit = True, return_train_score=True)
+    clf.fit(df,y_train)
+else:
+    clf = GridSearchCV(XGBClassifier(objective='binary:hinge'), params, scoring='f1',cv=10, refit = True, return_train_score=True)
+    clf.fit(df.drop('target', axis=1).values,y_train)
 print('Best-params:',clf.best_params_)
 print('Best-score:',clf.best_score_)
+
+"""
+Test-acc:  0.9689320388349515
+F1 score: 0.9183673469387756
+"""

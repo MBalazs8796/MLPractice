@@ -2,11 +2,12 @@
 import pandas as pd
 import numpy as np
 from sklearn.preprocessing import OrdinalEncoder, OneHotEncoder, MinMaxScaler
+from sklearn.decomposition import PCA
 #%%
 # used_column: a list of strings specifying which columns one wants to use
 # replaceUni: decide whether to fill the missing values of the enrolled_university column
 # shouldScale: decide whether to scale numeric values or not
-def load_and_process(train_path: str, test_path: str ,used_columns: list, replaceUni:bool=True, shouldScale:bool=False, shouldDropNA:bool=True) -> tuple:
+def load_and_process(train_path: str, test_path: str ,used_columns: list, replaceUni:bool=True, shouldScale:bool=False, shouldDropNA:bool=True, PCAtarget:int = 0) -> tuple:
     # read data from csv
     df = pd.read_csv(train_path)
     tdf = pd.read_csv(test_path)
@@ -23,7 +24,7 @@ def load_and_process(train_path: str, test_path: str ,used_columns: list, replac
     ordinal_encoder = OrdinalEncoder()
     one_hot_encoder = OneHotEncoder()
     scaler = MinMaxScaler()
-
+    pca = PCA(n_components=PCAtarget)
 
     if 'enrolled_university' in used_columns and replaceUni:
         df['enrolled_university'] = df['enrolled_university'].fillna('no_enrollment')
@@ -54,6 +55,12 @@ def load_and_process(train_path: str, test_path: str ,used_columns: list, replac
                 if max_value > 1 and index != 'enrollee_id':
                     df[index] = scaler.fit_transform(df[[index]])
                     tdf[index] = scaler.transform(tdf[[index]])
+        elif PCAtarget > 0:
+            y_train = df['target']
+            y_test = tdf['target']
+            df = pca.fit_transform(df)
+            tdf = pca.fit_transform(tdf)
+            return (df, y_train, tdf, y_test)
 
     return (df, tdf)
 #%%
