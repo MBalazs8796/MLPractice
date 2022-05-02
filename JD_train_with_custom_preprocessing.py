@@ -12,6 +12,8 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.mixture import GaussianMixture
 # %%
 
+# Custom preprocessing with 23 variables
+
 
 def preprocess(df: pd.DataFrame, fulldata: pd.DataFrame):
     processed = pd.DataFrame()
@@ -114,6 +116,8 @@ develop = preprocess(df.tail(2000), df)
 develop_target = df["target"].tail(2000)
 # %%
 
+# function for GMM
+
 
 def gaussian_fit(train_features, train_target):
     not_target_model = GaussianMixture(
@@ -139,6 +143,8 @@ def print_statistics(truth, predict):
     print("f1 = ", f1_score(truth, predict))
     # print(results)
 # %%
+
+# Main method for getting statistics about preprocessing
 
 
 def try_many_methods(train_features, train_target, features, target, no_gmm=False):
@@ -170,11 +176,13 @@ def try_many_methods(train_features, train_target, features, target, no_gmm=Fals
 
 
 # %%
+# test first preprocessing
 print("### On train ###")
 try_many_methods(train, train_target, train, train_target)
 print("### On development ###")
 try_many_methods(train, train_target, develop, develop_target)
 # %%
+# testing PCA
 pca = PCA(n_components=3)
 train_trans = pd.DataFrame(pca.fit_transform(train))
 train_trans['target'] = np.array(train_target)
@@ -205,7 +213,8 @@ plt.legend()
 # plt.show()
 plt.savefig('combi.png')
 # %%
-# %%
+
+# second preprocessing with 8 variables
 
 
 def preprocess2(df: pd.DataFrame, fulldata: pd.DataFrame):
@@ -261,7 +270,7 @@ def preprocess2(df: pd.DataFrame, fulldata: pd.DataFrame):
 
 
 # %%
-# Load data
+# Reload data
 df = pd.read_csv("csv/train_input.csv")
 df = df.sample(frac=1)
 train = preprocess2(df.tail(-2000), df)
@@ -269,6 +278,21 @@ train_target = df["target"].tail(-2000)
 develop = preprocess2(df.tail(2000), df)
 develop_target = df["target"].tail(2000)
 # %%
+# test second preprocessing
+print("### On train ###")
+try_many_methods(train, train_target, train, train_target)
+print("### On development ###")
+try_many_methods(train, train_target, develop, develop_target)
+# %%
+# Reload data
+df = pd.read_csv("csv/train_input.csv")
+df = df.sample(frac=1)
+train = preprocess(df.tail(-2000), df)
+train_target = df["target"].tail(-2000)
+develop = preprocess(df.tail(2000), df)
+develop_target = df["target"].tail(2000)
+# %%
+# Checking LDA
 lda = LinearDiscriminantAnalysis(n_components=1)
 lda.fit(train, train_target)
 components = pd.DataFrame(lda.coef_)
@@ -289,6 +313,7 @@ plt.legend()
 plt.show()
 # plt.savefig('LDAcombi.png')
 # %%
+# add new combined column with large weight and test the models
 trainOneCol = train.copy()
 trainOneCol['combi'] = 10*np.array(train).dot(np.array(combi))
 devOneCol = develop.copy()
@@ -302,7 +327,7 @@ try_many_methods(trainOneCol, train_target, devOneCol,
                  develop_target)
 
 # %%
-# resample
+# resampling
 
 
 def preprocess_resample(num_rows):
